@@ -1,0 +1,295 @@
+%% cls: https://raw.githubusercontent.com/HenryJi529/MorningstarPaper/main/morningstar.cls
+
+\documentclass[twocolumn]{morningstar}
+\title{深度强化学习驱动的复杂网络关键节点排序算法}
+\entitle{Key Node Sorting Algorithm in Complex Networks Driven by Deep Reinforcement Learning}
+\author{吉普}
+\enauthor{Pu Ji}
+\phone{19850052801}
+\email{221307020006@hhu.edu.cn}
+\location{南京}
+\enlocation{Nanjing}
+\organization{河海大学计算机与信息学院}
+\enorganization{School of Computer and Information Science, Hohai University}
+
+% \setcounter{section}{-1}
+
+\begin{document}
+
+\twocolumn[
+    \thispagestyle{firstpage}
+    \showcntitle
+    \showauthor
+    \showcnabstract{
+        图数据的在各个领域的广泛运用和现实世界网络连接的复杂性，使得如何在已知网络拓扑的前提下，快速精确地找到复杂通信网络中的关键节点成为当前的研究热点。
+        本文介绍了一种基于深度强化学习的节点重要性排序算法，该算法利用排序学习进行预训练来增强节点特征提取，并将节点嵌入向量应用于节点重要性的价值学习。
+        与传统算法相比，该算法在网络拆解问题上保持高精确率的同时，实现了较低的时间复杂度。
+        未来的研究可以进一步探索和改进这种算法，以应对不断增长的网络复杂性和规模的挑战。
+    }
+    \showcnkeywords{
+        关键节点；复杂网络；网络分析；强化学习；图神经网络；排序学习...
+    }
+    \showentitle
+    \showenauthor
+    \showenabstract{
+        The wide application of graph data in various fields and the complexity of real-world network connections make it a current research hotspot to find critical nodes in complex communication networks quickly and accurately with known network topology.
+        In this paper, we introduce a node importance ranking algorithm based on deep reinforcement learning, which enhances node feature extraction by utilizing Learning-To-Rank for pre-training and applies node embedding vectors to value-based reinforcement learning of node importance.
+        Compared with traditional algorithms, this algorithm achieves low time complexity while maintaining high accuracy on the network dismantling problem.
+        The algorithm improves accuracy in network dismantling and have the abiblity to reduce time complexity compared to traditional algorithms.
+        Future research can further explore and improve this algorithm to meet the challenges of growing network complexity and size.
+    }
+    \showenkeywords{
+        Critical Nodes; Complex Network; Network Analysis; Reinforcement Learning; Graph Nerual Network; Learning-To-Rank
+    }
+    ]
+
+\section*{引言}\label{sec:Introduction}
+现实世界中存在诸多相互关联、结构复杂的系统如互联网、交通系统、金融系统、社交关系、生态系统等，他们都可以被抽象为复杂网络。
+网络科学的研究表明，现实世界中的网络并不都是随机网络，相反，更多的呈现出幂律分布的特性\cite{barabasi1999幂律分布}。
+这一特性使得网络中存在一小部分节点，它们具有远远高于平均水平的连接性或重要性，这些节点通常被称为“超级节点”或“关键节点”。
+
+关键节点的存在增加了网络局部失效传导引发级联失效的可能，而级联失效的影响大小取决于最初失效节点在网络拓扑中的位置及其容量\cite{barabasi2016网络科学书}。
+因此，识别关键节点在多种网络应用中都具有重大的理论意义和应用价值。
+例如，在谣言传播网络中，通过控制超级传播者就能抑制信息传播与事态发展\cite{moreno2004谣言传播网络}；
+在电力网络中，保护枢纽节点就能阻止大规模电力故障\cite{郭明健2022基于复杂网络理论的电力网络抗毁性分析}；
+在生物分子网络中，中和某些有害蛋白质复合物以进行合理的药物设计\cite{kuntz1992药物设计网络}；
+在恐怖分子网络中，通过逮捕关键嫌疑人来摧毁恐怖组织的通讯体系\cite{arulselvan2009恐怖分子网络_CN}。
+
+目前存在的复杂网络关键节点识别方法，根据技术手段的不同，可以分为三大类: 基于网络拓扑结构的中心性度量方法、基于网络拆解的系统分析方法、基于机器学习的多特征融合融合方法。
+
+(1) 基于网络拓扑结构的中心性的度量方法一般会从节点的自身属性、局部属性、全局属性、位置属性四个方面度量节点的关键程度。
+相关方法有: HDA、CI\cite{morone2015集体影响力}、HBA、PageRank\cite{page1999PageRank}、K-Core等。
+由于这些方法通常从单一角度寻找反映节点关键程度的因素，且忽略了不同网络的结构差异性，导致识别精确率较低。
+
+(2) 基于网络拆解的系统分析方法通常通过评估节点删除后网络连通性的降低程度来度量节点的重要性。
+这类方法采用不同的网络连通性衡量标准，包括最大连通子图节点数、网络效率\cite{张海舰2014网络效率}、网络核度，以及最小生成树稳定性\cite{张品2013最小生成树稳定性}。
+根据具体的连通性指标，选择相应的网络拆解方法，以寻找节点的最优删除策略。
+
+(3) 随着人工智能的发展，学术界积极探索以机器学习为基础的多特征融合方法，以不断提升关键节点识别的效能。
+这一研究方向的演进源于最初简单的无监督特征融合\cite{zhao2020无监督特征融合}，其目的在于更精确地反映网络的实际情境。
+随着研究的深入，方法逐步演进至引入具有客观评价指标的(如SIR模拟)有监督学习\cite{杨洋2023有监督SIR模拟}，引导模型更好地适应实际应用场景。
+在近些年，研究者们更进一步引入了先进的强化学习技术\cite{fan2020FINDER}，大大增强模型的泛化能力和实用性。
+这一研究趋势为关键节点识别问题的解决带来了更为深刻和全面的方法论，为未来的研究和应用提供了有力的支持。
+
+本文针对复杂网络的关键节点识别问题，提出了一个强化学习驱动的算法，从断连节点对网络连通性影响的角度来评价节点的重要性。
+该算法综合考虑了节点自身属性、局部属性、全局属性以及位置属性四个方面的特征，通过排序学习的方法将这些特征融合生成节点的综合特征向量。
+通过深度Q网络，我们借助这些特征向量进行节点拆除的决策价值学习，从而获得最佳的节点拆除顺序，进而有效确定节点的重要性排序。
+在验证所提算法的性能时，我们分别对合成网络和经典真实网络进行了实验。通过这一实证研究，我们不仅验证了模型在不同网络结构下的泛化能力，也充分展示了其在实际应用中的实用性。
+
+
+\section{理论基础}\label{sec:TheoreticalBasis}
+
+\subsection{图残差网络}\label{sec:GraphResidualNetwork}
+
+图残差网络(Graph Residual Network, GResNet)是一种旨在克服深度谱域图神经网络假死问题(Suspended Animation Problem)的残差网络结构\cite{zhang2019GResNet}。
+
+它充分考虑到图神经网络中节点间的复杂关系，引入了四种不同类型的残差项，分别是naive residual、graph-naive residual、raw residual和graph-raw residual。
+通过灵活选择和组合不同的残差块，GResNet能够更好地捕捉图中节点之间的复杂关联，从而能有效地应对假死问题，为处理复杂的图结构数据提供了更强大、更鲁棒的工具。
+
+
+\subsection{排序学习}\label{sec:LearningToRank}
+排序学习(Learning to Rank, LTR)算法是使用机器学习解决排序问题的方法，该算法在信息检索与自然语言处理等领域应用广泛。
+排序学习的核心是学习一个排序模型$f(Q, \{d_1,d_2,\ldots,d_k\}) \rightarrow \{\hat{s}_1,\hat{s}_2,\ldots,\hat{s}_k\}$，在给定查询$Q$时，给出相关文档$\{d_1, d_2, \ldots, d_k \}$的合适排序/得分$\{\hat{s}_1, \hat{s}_2, \ldots, \hat{s}_k\}$。
+
+LTR算法可分为3种：单文档方法(Pointwise)、文档对方法(Pairwise)和文档列表方法(Listwise)。
+这3种方法以不同的方式对LTR过程进行建模，定义了各种输入和输出空间。
+其中，Pairwise方法主要是将排序问题转为预测一对多文档之间的相对顺序，常用的有Ranking SVM\cite{joachims2002RankingSVM}、RankBoost\cite{freund2003RankBoost}和RankNet\cite{burges2005RankNet}。
+
+\subsection{深度Q网络}\label{sec:DeepQNetwork}
+深度Q网络(Deep Q-Network，DQN)\cite{mnih2013DQN}是强化学习中的一种技术，结合了深度学习和价值学习的理念。
+它已经在许多领域取得了显著的成果，包括游戏仿真\cite{silver2016DQN游戏}、机器人控制\cite{haarnoja2018DQN机器人控制}和自动驾驶\cite{kiran2021DQN自动驾驶}等。
+该技术通过建模状态-动作价值函数($Q(s,a)$)，指导代理体在与环境的交互中选择给定状态下选择最优的动作，从而最大化累积奖励。
+
+深度Q网络利用深度神经网络来逼近和学习Q函数。该网络以当前状态为输入，输出每个动作的价值估计。
+通过迭代神经网络中的参数和调整每个动作的价值估计，深度Q网络可以逐步改善代理体的决策过程。
+
+与传统Q学习相比，该方法的优势在于对高维状态空间的处理能力、离线学习的可行性以及数据效率的提高方面。
+这些特点使其在解决复杂任务和处理大规模问题时具有显著的优势。
+
+
+\section{研究方法}\label{sec:Methods}
+
+从网络拆解的角度来说，关键节点就可以定义为删除或断连后可以使网络的功能得到最大程度削弱的节点\cite{李天梅2019复杂网络的关键节点识别}。
+本文的核心思路将关键节点排序问题转换为节点拆除策略的优化问题，即找寻能让图的连通性下降最快的节点拆除顺序。
+
+\subsection{问题建模}\label{sec:ProblemFormulation}
+
+本文选用累积归一化连接性(Accumulated Normalized Connectivity, ANC)作为节点拆除策略的评价指标\cite{schneider2011ANC}: 
+给定一个网络$\mathcal{G}=(\mathcal{V},\mathcal{E})$与一个预定义的连接性评价函数$\sigma$，
+目标是设计一个节点断连策略，能够最小化ANC：
+
+\input{formula/有拆除代价的ANC.tex}
+\noindent 满足$\sum c(\cdot) = 1$。
+在不考虑拆除代价的条件下，就可以令$c(\cdot) = \frac{1}{N}$，得到
+\input{formula/无拆除代价的ANC.tex}
+
+\noindent 其中，$N$为断连的节点数量。
+针对不同的问题，可以选择不同的$\sigma$：
+
+\begin{enumerate}[leftmargin=1em]
+    \item 在处理Critical Node(CN)问题\cite{arulselvan2009恐怖分子网络_CN}时，可以考虑使用成对连接性:
+    $\sigma_{\text {pair }}(\mathcal{G})=\sum_{C_i \in \mathcal{G}} \frac{\delta_i(\delta_i-1)}{2}$。
+    ($C_i$是图中的连通分量，$\delta_i$是$C_i$中的节点数)
+    \item 当处理Network Dismantling(ND)问题\cite{braunstein2016ND}时，可以使用最大连通子图的节点数量:
+    $\sigma_{\mathrm{gcc}}(\mathcal{G})=\max \{\delta_i ; C_i \in \mathcal{G}\}$。
+\end{enumerate}
+
+对于每个节点$v_i \in V$，引入二进制变量$s_i \in \{0,1\}$，其中$0$表示节点$v_i$已断连，$1$表示节点$v_i$未断连。
+因此，整个网络的状态可以由二进制元组$(s_1, s_2, \ldots, s_{|V|})$ 表示。由此可见，网络的状态空间大小为$2^{|V|}$。
+此外，还可以求得，该网络存在$V\cdot2^{|V-1|}$种状态转移的可能。当图的节点数为3时($\mathcal{V} = \{v_1, v_2, v_3\}$)，网络的状态转移如图\ref{fig:网络状态转移图}所示。
+
+\input{image/网络状态转移图.tex}
+
+节点的断连价值可以理解为断连前后状态连接性的差值，并非是一个定值，会随着状态的改变而改变。
+由于网络拆解过程中网络连接性是单调不增的，因而最佳拆除策略是迭代拆除当前状态下断连价值最大的节点。
+
+\input{image/最短路径问题.tex}
+
+根据评价指标的定义及相关推论，显然有以下朴素算法成立: 
+针对特定的$\sigma$，计算每个状态的连接性，并将其转化为状态转移图中指向该状态的连边权重，
+这样就将累积归一化连接性的最小化问题就可以转化为状态转移图从原始状态到全断连状态的最短路径问题(如图\ref{fig:最短路径问题})，
+所求的最短路径就是最佳拆除策略，也就是在当前连接性指标$\sigma$下的最精确的节点重要性排序。
+
+
+然而，这一朴素算法虽然能够在当前的评价指标下求出精确的关键节点排序，
+但由于指数级的状态数，使得该算法只适用于小型图，而在面对大型图时面临严重的计算复杂度挑战。
+因此，需要探索出一种在时间复杂度显著降低的前提下，依然能够保持良好精确度的算法。
+
+
+\subsection{算法框架}\label{sec:AlgorithmFramework}
+
+顺着朴素算法的思路，本研究提出了关键节点排序算法使用一个基于深度Q学习的强化学习模型来评估每个状态下节点的断连价值。
+运用贪心策略拆解网络并记录节点的断连顺序，进而有效确定节点的重要性排序。
+
+具体流程如下: 
+
+(1) 计算需要输入网络的节点特征；
+
+(2) 将节点特征矩阵和当前网络结构输入强化学习模型，获得每个节点的断连价值，拆解价值最高的节点；
+
+(3) 重复步骤2，直到输入网络中所有的节点都被断连，断连的顺序就是关键节点排序。
+
+
+\subsection{模型设计}\label{sec:ModelDesign}
+
+本文所提出的模型将卷积神经网络中常用的迁移学习引入图神经网络中，
+将模型的离线训练过程分为基于排序学习的预训练过程和基于强化学习的训练过程。
+
+
+\input{image/模型设计图.tex}
+
+按照用途，可以将本文的神经网络分为三层，分别是嵌入层(Embedding Layer)、排序层(Ranking Layer)和评估层(Valuing Layer)，如图\ref{fig:模型设计图}所示。
+预训练过程会利用到嵌入层和排序层并更新这两层的参数，而训练过程则会使用嵌入层和评估层，但会冻结嵌入层，只更新评估层的参数。
+
+\subsubsection{排序学习预训练流程}
+
+\input{image/预训练流程图.tex}
+
+
+(1) 使用动态分批器从合成网络(合成方法见\ref{sec:SyntheticDataset})中加载数据，得到特征矩阵尺寸为$[\hat{N}\times M_1]$的数据批
+【$\hat{N}$表示数据批的节点数, $M_1$表示节点原始特征数】。
+
+(2) 将数据批输入嵌入层，得到$[\hat{N_i}\times M_2]$的图嵌入矩阵【$M_2$表示嵌入层的输出通道数】。
+
+(3) 将图嵌入矩阵的不同行成对组合，得到$[\frac{N(N-1)}{2} \times 2M_2]$的相关性矩阵。
+这个相关性矩阵的每一行都是由图嵌入矩阵中的两行拼接而成，代表着这两行对应的两个节点重要性的差值。
+
+(4) 将相关性矩阵输入排序层中，输出一个$\frac{N(N-1)}{2}$的向量，这个向量的每个元素代表对应节点对的重要性预测差值。
+【如果元素大于阈值，代表$v_i$的重要性高于$v_j$；反之，代表$v_i$的重要性低于$v_j$】
+
+(5) 对数据批中的标签进行类似步骤3中的处理，得到每两个节点的重要性真实差值。
+
+(6) 将重要性真实差值与重要性预测差值做均方差后反向传播更新模型。
+
+\subsubsection{强化学习训练流程}
+
+(1) 定义状态空间: $\mathcal{S}$，包含$2^{|V|}$的节点断连状态
+(2) 定义动作空间: $\mathcal{A}$，表示可以采取的$|V|$个断连动作。
+(3) 神经网络建模: 使用DQN表示状态动作价值函数 $Q(s, a; \theta)$，其中 $s$ 是状态，$a$ 是动作，$\theta$ 是神经网络参数。
+初始化神经网络参数 $\theta$。
+(4) 神经网络训练: 使用梯度下降法更新神经网络参数 $\theta$ 以最小化损失函数 $L(\theta)$。
+
+\begin{itemize}
+    \item 经验回放：维护一个经验回放缓冲区，存储智能体之前的经验，包括状态、动作、奖励和下一个状态。从经验回放缓冲区中随机抽样一批数据，用于训练神经网络。
+    \item 策略执行：在每个时间步，根据当前策略选择动作 $a$，例如使用 $\epsilon$-贪心策略，其中 $\epsilon$ 是探索率。
+    \item 网络更新：定期更新目标网络的参数 $\theta^- \leftarrow \theta$。
+    \item 训练循环：重复执行上述步骤，直到达到预定的训练轮次或学到足够好的策略。
+\end{itemize}
+
+\input{image/训练流程图.tex}
+
+
+\section{实验评估}\label{sec:ExperimentalEvaluation}
+\subsection{数据来源}\label{sec:DataCollection}
+
+\subsubsection{合成数据集}\label{sec:SyntheticDataset}
+
+合成数据集生成包括三个步骤：网络构建、特征提取、标签生成。
+
+(1) 网络构建: 使用erdos renyi、small world、barabasi albert三种网络模型分别生成随机网络、小世界网络和无标度网络。
+具体的网络参数可以用给定度区间内的度$N$和满足powerlaw分布(见式\ref{formula:合成图的平均度分布})的平均度$\langle k \rangle$计算得到。
+
+\input{formula/合成图的平均度分布.tex}
+
+(2) 特征提取: 分别选用度中心性、集聚系数、HITS、K核数代表网络中节点的自身属性、局部属性、全局属性、位置属性四个方面的特征，为每张图构建一个$|V|\times4$的特征矩阵。
+
+(3) 标签生成: 选用在复杂度和精确度上表现均衡的PageRank算法作为节点排序算法，对每张图进行排序。
+
+
+\subsubsection{真实数据集}\label{sec:RealDataset}
+
+\begin{itemize}
+    \item "airport": 基础设施
+    \item "amazon": 商品关联
+    \item "bitcoin": 金融交易
+    \item "cora": 科学合作
+    \item "email": 社交通信
+    \item "douban": 演员网络
+    \item "github": 科学合作
+    \item "karateclub": 社交关系(小型)
+    \item "protein": 生物网络
+    \item "wiki": 知识图谱
+\end{itemize}
+
+
+
+
+\subsection{结果分析}\label{sec:ResultAnalysis}
+
+
+\subsubsection{精确度}\label{sec:Accuracy}
+
+\input{image/实验结果-合成数据集.tex}
+\input{image/实验结果-真实数据集.tex}
+
+\subsubsection{复杂度}\label{sec:Complexity}
+
+
+其他性能较好的算法都是Adaptive的，一般需要$O(|V|^3)$以上的复杂度；
+而本文提出的算法之需要$|V|$次神经网络的前向传播，在GPU的条件下可以运算的非常快。
+
+
+
+
+
+\section{总结}\label{sec:Conclusion}
+
+本文给出了一种高效精准的关键节点排序算法，主要贡献总结如下:
+
+\begin{itemize}
+    \item 从网络拆解的角度提出了节点重要性的朴素算法，并分析了其存在的复杂度问题。
+    \item 构建了一个深度强化学习模型用于求解最快的网络拆解策略，进而确定节点的重要性排序。
+    \item 对算法进行了深入仿真，结果表明所提算法在复杂度和精准度上表现优秀。
+\end{itemize}
+
+然而，还存在两方面的不足：
+
+\begin{itemize}
+    \item 没结合特定时变网络(Temporal Network)的性质做更有效的排序，例如针对特定的时变网络做微调(Fine-tuning)。
+    \item 无法处理有权网络
+\end{itemize}
+
+
+\addbib{references.bib}
+
+\end{document}

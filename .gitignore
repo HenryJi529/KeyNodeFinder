@@ -1,0 +1,14 @@
+VENV/
+TEMP/
+release/
+.DS_Store
+**/__pycache__/
+.VSCodeCounter/
+._wordcount_selection.tex
+
+.env
+paper.py
+
+TODO.md
+test.ipynb
+test.py

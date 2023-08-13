@@ -1,0 +1,12 @@
+*.pkl
+*.csv
+*.tsv
+*.pt
+*.npz
+*.txt
+*.zip
+*.json
+*.edgelist
+*.md
+
+__MACOSX

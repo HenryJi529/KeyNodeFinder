@@ -1,0 +1,16 @@
+{
+    /****Todo Tree****/
+    "todo-tree.filtering.excludeGlobs": [
+        "**/VENV/**",
+        "**/node_modules",
+        "**/dist/**",
+    ],
+    "todo-tree.general.tags": [
+        "TODO",
+        "FIXME",
+        "HACK",
+        "XXX",
+    ],
+    /****TensorBoard****/
+    "python.tensorBoard.logDirectory": "./logs"
+}

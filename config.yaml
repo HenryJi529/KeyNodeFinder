@@ -1,0 +1,23 @@
+# 建模相关参数
+problem: ND
+# 模型相关参数
+output_features: 10
+embedding_units: DEFAULT
+ranking_units: 5
+valuing_units: [10, 5]
+# 数据相关参数
+instances: 100
+# 训练相关参数
+pre_max_length: 1000
+pre_epochs: 20
+pre_learning_rate: DEFAULT
+pre_weight_decay: DEFAULT
+rounds: 5
+greedy_rate: DEFAULT
+discount_rate: DEFAULT
+learning_rate: DEFAULT
+weight_decay: DEFAULT
+# 实验相关参数
+environment: matpool
+seed: 42
+verbose: true
