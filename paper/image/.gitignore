@@ -1,0 +1,4 @@
+*.bkp
+*.dtmp
+_*.drawio
+backup/

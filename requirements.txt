@@ -1,0 +1,25 @@
+# Python3.9
+colorama
+ipykernel
+matplotlib
+mlxtend
+networkx
+numpy
+openpyxl
+pandas
+powerlaw
+pygobject # GTK的依赖
+pympler # 内存计算
+pytz
+pyyaml
+SciencePlots
+scikit-learn
+scipy
+seaborn
+tensorboard
+torch
+torch_geometric==2.5.0
+torch-tb-profiler
+torchinfo
+torchmetrics
+tqdm
