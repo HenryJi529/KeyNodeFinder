@@ -20,7 +20,7 @@ def get_algorithms():
 
 def plot_on_synthetic_datasets():
     algorithms = get_algorithms()
-    plot_ANC_bar(algorithms, instanceNum=5)
+    plot_ANC_bar(algorithms, instanceNum=3)
     plt.show()
 
 
@@ -53,6 +53,6 @@ def get_firstGraphInfo_from_dataset(datasetName: str):
 if __name__ == "__main__":
     datasetName = "karateclub"
     # plot_on_synthetic_datasets()
-    # plot_on_real_dataset(datasetName)
-    calc_anc_on_dataset(datasetName)
+    plot_on_real_dataset(datasetName)
+    # calc_anc_on_dataset(datasetName)
     # get_firstGraphInfo_from_dataset(datasetName)
