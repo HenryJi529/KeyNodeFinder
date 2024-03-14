@@ -92,9 +92,9 @@ def plot_ANC_curve(
                 title = f"{problemType.name} - Graph({len(records)-1})"
             else:
                 title = f"{problemType.name} - {datasetName}({len(records)-1})"
-            plt.title(title)
-            plt.ylabel(f"Residual Connectivity")
-            plt.xlabel("Fraction of disconnected nodes")
+            plt.title(title, fontdict={"size": 18})
+            plt.ylabel(f"Residual Connectivity", fontdict={"size": 16})
+            plt.xlabel("Fraction of disconnected nodes", fontdict={"size": 16})
             plt.legend(loc="upper right", bbox_to_anchor=(0.98, 0.98))
             plt.tight_layout()
 
@@ -180,8 +180,15 @@ def plot_ANC_bar(
                 multiplier += 1
 
             # Add some text for labels, title and custom x-axis tick labels, etc.
-            plt.title(f"{problemTypeName} - {graphModelName[5:]}")
-            plt.ylabel(f"Accumulated Normalized Connectivity")
-            plt.xticks(x + (width + gap) * (len(algorithmNames) - 1) / 2, nodeNumRanges)
+            plt.title(
+                f"{problemTypeName} - {graphModelName[5:]}", fontdict={"size": 18}
+            )
+            plt.ylabel(f"Accumulated Normalized Connectivity", fontdict={"size": 16})
+            plt.xticks(
+                x + (width + gap) * (len(algorithmNames) - 1) / 2,
+                nodeNumRanges,
+                fontsize=12,
+            )
+            plt.yticks(fontsize=12)
             plt.ylim(0, max([max(values) for values in algorithmRecord.values()]) * 1.2)
             plt.legend(loc="upper left")
