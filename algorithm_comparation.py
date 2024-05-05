@@ -46,8 +46,7 @@ def compare_algorithms_on_dataset(algorithms: Tuple[_Algorithm], dataset: Datase
                 resultDict[f"{algorithm.name}-{problemType.name}"] = []
                 recordDict[f"{algorithm.name}-{problemType.name}"] = []
         for ind in range(len(dataset)):
-            data = dataset[ind]
-            a, b = compare_algorithms_on_data(algorithms, data)
+            a, b = compare_algorithms_on_data(algorithms, dataset[ind])
             for key in a:
                 resultDict[key].append(a[key])
                 recordDict[key].append(b[key])

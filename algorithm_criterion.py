@@ -100,7 +100,9 @@ class AccumulatedNormalizedConnectivityCriterion:
     ):
         self.graph = graph
         if disconnection_cost:
-            assert len(disconnection_cost) == len(graph.nodes), "断连成本字典长度必须与节点数一致"
+            assert len(disconnection_cost) == len(
+                graph.nodes
+            ), "断连成本字典长度必须与节点数一致"
             self.disconnection_cost = {
                 node: disconnection_cost[node] / sum(disconnection_cost.values())
                 for node in disconnection_cost
