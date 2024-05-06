@@ -30,6 +30,26 @@ def compare_algorithms_on_graph(algorithms: Tuple[_Algorithm], graph: nx.Graph):
     return resultDict, recordDict
 
 
+def compare_algorithms_on_graphs_by_anc(
+    algorithms: Tuple[_Algorithm], graphs: list[nx.Graph]
+):
+    result = {}
+    for problemType in ProblemType:
+        result.update(
+            {
+                f"{algorithm.name}-{problemType.name}": round(
+                    np.mean(
+                        [algorithm.get_anc(graph, problemType) for graph in graphs]
+                    ),
+                    3,
+                )
+                for algorithm in algorithms
+            }
+        )
+
+    return result
+
+
 def compare_algorithms_on_data(algorithms: Tuple[_Algorithm], data: Data):
     graph = to_networkx(data, to_undirected=True)
     return compare_algorithms_on_graph(algorithms, graph)
