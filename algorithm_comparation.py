@@ -1,5 +1,5 @@
 from typing import Tuple
-
+import time
 import networkx as nx
 import numpy as np
 from scipy.interpolate import interp1d
@@ -65,6 +65,29 @@ class AlgorithmComparator:
                             ]
                         ),
                         3,
+                    )
+                    for algorithm in self.algorithms
+                }
+            )
+
+        return result
+
+    def compare_on_graphs_by_meanTime(self, graphs: list[nx.Graph]):
+        def timit(
+            algorithm: _Algorithm, graphs: list[nx.Graph], problemType: ProblemType
+        ):
+            startTime = time.time()
+            # NOTE: 不需要记录返回值
+            _ = [algorithm.get_anc(graph, problemType) for graph in graphs]
+            endTime = time.time()
+            return (endTime - startTime) / len(graphs)
+
+        result = {}
+        for problemType in ProblemType:
+            result.update(
+                {
+                    f"{algorithm.name}-{problemType.name}": round(
+                        timit(algorithm, graphs, problemType), 1
                     )
                     for algorithm in self.algorithms
                 }
