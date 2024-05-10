@@ -19,9 +19,9 @@ def get_algorithms() -> list[_Algorithm]:
     return algorithms
 
 
-def plot_on_synthetic_datasets():
+def plot_on_synthetic_datasets(instanceNum: int = 3):
     algorithms = get_algorithms()
-    plot_ANC_bar(algorithms, instanceNum=3)
+    plot_ANC_bar(algorithms, instanceNum=instanceNum)
     plt.show()
 
 
@@ -29,7 +29,9 @@ def plot_on_real_dataset(datasetName: str):
     algorithms = get_algorithms()
     datasets = DatasetLoader.load_real_dataset()
     dataset: Dataset = datasets[datasetName]
-    resultDict, recordDict = compare_algorithms_on_dataset(algorithms, dataset)
+    resultDict, recordDict = AlgorithmComparator(algorithms).compare_on_dataset_by_all(
+        dataset
+    )
     plot_ANC_curve(
         algorithms, recordDict, resultDict, useRatio=True, datasetName=datasetName
     )
@@ -40,7 +42,7 @@ def calc_anc_on_dataset(datasetName: str):
     algorithms = get_algorithms()
     datasets = DatasetLoader.load_real_dataset()
     dataset = datasets[datasetName]
-    resultDict, _ = compare_algorithms_on_dataset(algorithms, dataset)
+    resultDict, _ = AlgorithmComparator(algorithms).compare_on_dataset_by_all(dataset)
     print(f"{datasetName}: {resultDict}")
 
 
@@ -64,14 +66,14 @@ def test_on_averageDegrees(
             barabasi_albert_graph(graphNodeNum, int(averageDegree / 2))
             for _ in range(graphNum)
         ]
-        result = compare_algorithms_on_graphs_by_anc(algorithms, graphs)
+        result = AlgorithmComparator(algorithms).compare_on_graphs_by_meanANC(graphs)
         print(result)
 
 
 if __name__ == "__main__":
+    # plot_on_synthetic_datasets(1)
     # datasetName = "karateclub"
-    # plot_on_synthetic_datasets()
     # plot_on_real_dataset(datasetName)
     # calc_anc_on_dataset(datasetName)
     # get_firstGraphInfo_from_dataset(datasetName)
-    test_on_averageDegrees(graphNodeNum=500)
+    test_on_averageDegrees(graphNodeNum=50, averageDegreeList=[2, 10])
