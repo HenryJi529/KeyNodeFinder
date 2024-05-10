@@ -52,7 +52,7 @@ class _Algorithm(ABC):
     def get_anc(self, graph: nx.Graph, problemType: ProblemType):
         criterion = AccumulatedNormalizedConnectivityCriterion(graph)
         order = self.get_order_by_problemType(graph, problemType)
-        return criterion(order, problemType)[0]
+        return criterion(order, problemType)
 
 
 class _MetricBasedAlgorithm(_Algorithm):
