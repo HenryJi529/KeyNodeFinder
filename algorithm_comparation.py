@@ -15,62 +15,62 @@ from utils.toolbox import ProblemType, GraphTool, DEFAULT_NODE_NUM_RANGES
 from utils.common import markers_generator
 from data_synthesizing import GraphBA, GraphER, GraphSW
 from algorithm_collection import _Algorithm
-from algorithm_criterion import AccumulatedNormalizedConnectivityCriterion
 
 
-def compare_algorithms_on_graph(algorithms: Tuple[_Algorithm], graph: nx.Graph):
-    resultDict, recordDict = {}, {}
-    criterion = AccumulatedNormalizedConnectivityCriterion(graph)
-    for problemType in list(ProblemType):
-        for algorithm in algorithms:
-            order = algorithm.get_order_by_problemType(graph, problemType)
-            final_value, record = criterion(order, problemType)
-            resultDict[f"{algorithm.name}-{problemType.name}"] = final_value
-            recordDict[f"{algorithm.name}-{problemType.name}"] = record
-    return resultDict, recordDict
+class AlgorithmComparator:
+    def __init__(self, algorithms: Tuple[_Algorithm]):
+        self.algorithms = algorithms
 
-
-def compare_algorithms_on_graphs_by_anc(
-    algorithms: Tuple[_Algorithm], graphs: list[nx.Graph]
-):
-    result = {}
-    for problemType in ProblemType:
-        result.update(
-            {
-                f"{algorithm.name}-{problemType.name}": round(
-                    np.mean(
-                        [algorithm.get_anc(graph, problemType) for graph in graphs]
-                    ),
-                    3,
-                )
-                for algorithm in algorithms
-            }
-        )
-
-    return result
-
-
-def compare_algorithms_on_data(algorithms: Tuple[_Algorithm], data: Data):
-    graph = to_networkx(data, to_undirected=True)
-    return compare_algorithms_on_graph(algorithms, graph)
-
-
-def compare_algorithms_on_dataset(algorithms: Tuple[_Algorithm], dataset: Dataset):
-    if len(dataset) == 1:
-        data = dataset[0]
-        return compare_algorithms_on_data(algorithms, data)
-    else:
+    def compare_on_graph_by_all(self, graph: nx.Graph):
         resultDict, recordDict = {}, {}
         for problemType in list(ProblemType):
-            for algorithm in algorithms:
-                resultDict[f"{algorithm.name}-{problemType.name}"] = []
-                recordDict[f"{algorithm.name}-{problemType.name}"] = []
-        for ind in range(len(dataset)):
-            a, b = compare_algorithms_on_data(algorithms, dataset[ind])
-            for key in a:
-                resultDict[key].append(a[key])
-                recordDict[key].append(b[key])
+            for algorithm in self.algorithms:
+                final_value, record = algorithm.get_anc(graph, problemType)
+                resultDict[f"{algorithm.name}-{problemType.name}"] = final_value
+                recordDict[f"{algorithm.name}-{problemType.name}"] = record
         return resultDict, recordDict
+
+    def compare_on_data_by_all(self, data: Data):
+        graph = to_networkx(data, to_undirected=True)
+        return self.compare_on_graph_by_all(graph)
+
+    def compare_on_dataset_by_all(self, dataset: Dataset):
+        if len(dataset) == 1:
+            data = dataset[0]
+            return self.compare_on_data_by_all(data)
+        else:
+            resultDict: dict[str, list] = {}
+            recordDict: dict[str, list] = {}
+            for problemType in list(ProblemType):
+                for algorithm in self.algorithms:
+                    resultDict[f"{algorithm.name}-{problemType.name}"] = []
+                    recordDict[f"{algorithm.name}-{problemType.name}"] = []
+            for ind in range(len(dataset)):
+                resultDict1, recordDict1 = self.compare_on_data_by_all(dataset[ind])
+                for key in resultDict1:
+                    resultDict[key].append(resultDict1[key])
+                    recordDict[key].append(recordDict1[key])
+            return resultDict, recordDict
+
+    def compare_on_graphs_by_meanANC(self, graphs: list[nx.Graph]):
+        result = {}
+        for problemType in ProblemType:
+            result.update(
+                {
+                    f"{algorithm.name}-{problemType.name}": round(
+                        np.mean(
+                            [
+                                algorithm.get_anc(graph, problemType)[0]
+                                for graph in graphs
+                            ]
+                        ),
+                        3,
+                    )
+                    for algorithm in self.algorithms
+                }
+            )
+
+        return result
 
 
 def plot_ANC_curve(
@@ -156,11 +156,11 @@ def plot_ANC_bar(
                     ).build()
                     # 计算每张图在特定problemType上的ANC
                     result_graph = {}
-                    criterion = AccumulatedNormalizedConnectivityCriterion(graph)
                     for algorithm in algorithms:
-                        order = algorithm.get_order_by_problemType(graph, problemType)
+                        result_graph[algorithm.name] = algorithm.get_anc(
+                            graph, problemType
+                        )[0]
                         pbar.update(1)
-                        result_graph[algorithm.name] = criterion(order, problemType)[0]
                     for key in result_graph:
                         result_nodeNumRange[nodeNumRange][key].append(result_graph[key])
                 for key in result_nodeNumRange[nodeNumRange]:
