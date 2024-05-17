@@ -19,7 +19,6 @@ FTP_DIR = "KeyNodeFinder"
 def set_matplotlib_engine():
     if platform.system() == "Darwin":
         mpl.use("GTK4Agg")
-        # mpl.use("GTK3Agg")
 
 
 def markers_generator():
