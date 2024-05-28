@@ -586,6 +586,7 @@ class ProposedAlgorithm(_Algorithm):
         mapped_order = []
         model.eval()
         with torch.inference_mode():
+            stateData = originData
             with torch.autocast(
                 device_type=str(next(iter(model.parameters())).device),
                 enabled=True,  # NOTE: 支持混合精度计算(可以在保持准确性的同时提高性能)
@@ -595,7 +596,7 @@ class ProposedAlgorithm(_Algorithm):
                     desc=f"{self.NAME}",
                     leave=False,
                 ):
-                    stateData = get_stateData(state, originData)
+                    stateData = get_stateData(state, stateData)
                     values: Tensor = model(
                         Batch.from_data_list([stateData]), task=Task.VALUE
                     )
