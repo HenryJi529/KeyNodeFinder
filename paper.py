@@ -10,7 +10,7 @@ from algorithm_collection import _Algorithm
 
 def get_algorithms(flag: True) -> list[_Algorithm]:
     algorithms = [
-        # get_proposed_algorithm(flag),
+        get_proposed_algorithm(flag),
         HDAAlgorithm(),
         CIAlgorithm(2),
         KCoreAlgorithm(),
@@ -58,7 +58,7 @@ def compare_time_by_graphNodeNums(
     graphNum: int = 1,
     graphNodeNums: list[int] = [200, 400, 800, 1600, 3200],
 ):
-    algorithms = get_algorithms(False)
+    algorithms = get_algorithms()
     print(f"网络密度: {networkDensity}")
     for graphNodeNum in graphNodeNums:
         print(f"graphNodeNum: {graphNodeNum}")
